@@ -1,0 +1,21 @@
+header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: baseline;
+}
+header nav {
+    display: flex;
+    gap: 20px;
+}
+
+
+
+.resultat {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.resultat > p {
+    flex: initial;
+}
