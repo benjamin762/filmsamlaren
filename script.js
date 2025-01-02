@@ -44,14 +44,70 @@ async function updateHtml(data) {
         //inga resultat
     }
     data.Search.forEach(element => {
-        let e = document.createElement("p")
+        let e = document.createElement("details")
         e.innerHTML = `
-        <img src=${element.Poster}>
+        <summary>
+        ${element.Poster == "N/A" ? "" : "<img src="+element.Poster+">"}
         <h2>${element.Title}</h2>
-        <p>Year: ${element.Year} - Type: ${element.Type} - IMDB id: ${element.imdbID}</p>
+        </summary>
+        <div>
+        <!--<p>Year: ${element.Year} - Type: ${element.Type} - IMDB id: ${element.imdbID}</p>-->
+        </div>
         `
         resultSection.appendChild(e)
+
+        e.addEventListener("toggle", async (event) => {
+            if(e.open && !e.querySelector('p')) {
+                // details är öppnad och p med mer ifo finns inte
+                let p = document.createElement('p');
+                p.innerText = "Laddar filminfo.";
+                e.appendChild(p);
+                // fetxh details
+                async function getDetails() {
+                    let response = await fetch("http://www.omdbapi.com/?i="+element.imdbID+"&apikey="+ await apiKey)
+                    let data = await response.json();
+                    return data;
+                }
+                let details = await getDetails();
+
+                // display details
+                let html = "<table>";
+                for (const key in details) {
+                    if (key == "Ratings") {
+                        html+= "<tr><th>"+ key+ "</th><td><table>";
+                        for (let rating of details[key]) {
+                            html += "<tr><th>"+rating.Source + "</th><td>" + rating.Value + "</td></tr>"
+                        }
+                        if (details[key].length == 0) {
+                            html += "No ratings."
+                        }
+                        html += "</table></td></tr>";
+                    } else if (key == "Poster") {
+                        if (details[key] == "N/A") {
+                            html+= "<tr><th>"+ key+ "</th><td> No poster.</td></tr>"
+                        } else {
+                            html+= "<tr><th>"+ key+ "</th><td><img src='"+ details[key]+ "'></td></tr>"
+                        }
+                    } else if (key == "Response") {
+                        // Ignore
+                    } else {
+                        html+= "<tr><th>"+ key+ "</th><td>"+ details[key]+ "</td></tr>"
+                    }
+                }
+                html += "</table>";
+
+                p.innerHTML = html;
+                console.log(details, typeof details);
+            } else {
+                // details är stängd
+            }
+        });
     });
 }
 
 search();
+
+
+// //////////////////////////////////////////////////////////////////
+
+
