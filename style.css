@@ -33,3 +33,62 @@ details[open] {
     margin: 16px 0 24px 100px;
   }
 }
+
+/* Media queries */
+
+/* Smartphone */
+@media (width <= 425px) {
+    body {
+        font: 2em;
+        color: rgb(0, 0, 0);
+    }
+}
+
+/* Tablet */
+@media (425px < width <= 768px) {
+    body {
+        color: purple;
+    }
+    body {
+        columns: 2;
+    }
+    header, footer {
+        column-span: all;
+    }
+    section {
+        break-inside: avoid;
+    }
+}
+
+/* Desktop */
+@media (768px < width) {
+    html {
+        background: rgb(146, 218, 178)
+    }
+
+    body {
+        columns: 2;
+        margin: 0 10%;
+        background: white;
+    }
+    header, footer {
+        column-span: all;
+    }
+    section {
+        break-inside: avoid;
+    }
+
+    .results, .fav-list {
+        columns: 24em;
+    }
+    details {
+        break-inside: avoid;
+    }
+}
+
+table {
+    max-width: 100%;
+}
+img {
+    max-width: 100%;
+}
