@@ -110,6 +110,9 @@ async function updateHtml(data) {
             }
         });
     });
+
+    
+    resultSection.insertAdjacentHTML('beforeend', `<p> Showing ${ data.Search.length } search results.`);
 }
 
 search(); // Load first 10 films from prefilled search.
