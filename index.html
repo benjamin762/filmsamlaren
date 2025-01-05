@@ -9,10 +9,14 @@
 <body>
     <header>
         <h1>FilmSamlaren</h1>
-        <nav><a href="index.html">Start</a><a href="favorites.html">favorites</a><a href="Settings">Settings    </a></nav>
+        <nav>
+            <a href="#search">Search</a>
+            <a href="#favorites">favorites</a>
+            <!-- <a href="#">Settings</a> -->
+        </nav>
     </header>
     <section class="hero-section"></section>
-    <section>
+    <section id="search">
         <form action=""><label>Sök<input type="text" value="x-men"></label><button type="reset">Rensa</button><button type="submit" id="searchButton">Sök</button></form>
         <!--<div>Filter results   
             <p>genre</p>
@@ -43,8 +47,8 @@
             </ul>
             
         </div>-->
+        <h2>Search results</h2>
         <div class="resultat">
-            <h2>Search results</h2>
             <div class="film-item">
                 <img src="" alt="">
             <p class="film-title"></p>
@@ -110,8 +114,13 @@
             <p class="film-title"></p>
             <p class="film-rating"></p>
         </div>
-        <nav class="pagination"><button>&lt;prev</button><button>1</button><button>2</button><button>3</button><button>4</button><button>5</button><button>next></button></nav>
+        <nav class="pagination"><!--eller laddar mer knapp/infinite scroll?--><button>&lt;prev</button><button>1</button><button>2</button><button>3</button><button>4</button><button>5</button><button>next></button></nav>
         </div>
+    </section>
+    <section id="favorites">
+        <h2>Favoriter</h2>
+        <!-- <div class="no-fav">Inga favoriter. Lägg till en film från ovan.</div> -->
+        <div class="fav-list"></div><!-- filmer detaljer ta bort knapp m. ångra -->
     </section>
     <footer>
         Page footer.

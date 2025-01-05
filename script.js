@@ -1,4 +1,4 @@
-document.querySelector("form").addEventListener("submit", ()=>{event.preventDefault(); search()})
+document.querySelector("form").addEventListener("submit", (event)=>{event.preventDefault(); search()})
 
 async function search() {
     
@@ -49,11 +49,7 @@ async function updateHtml(data) {
         <summary>
         ${element.Poster == "N/A" ? "" : "<img src="+element.Poster+">"}
         <h2>${element.Title}</h2>
-        </summary>
-        <div>
-        <!--<p>Year: ${element.Year} - Type: ${element.Type} - IMDB id: ${element.imdbID}</p>-->
-        </div>
-        `
+        </summary>`;
         resultSection.appendChild(e)
 
         e.addEventListener("toggle", async (event) => {
@@ -98,6 +94,28 @@ async function updateHtml(data) {
 
                 p.innerHTML = html;
                 console.log(details, typeof details);
+
+                p.insertAdjacentHTML('beforeend',"<button> 😍💑💗❤Favorit </button>");
+                e.querySelector('button').addEventListener('click', function () {
+                    favourites.push(details);
+                    localStorage.setItem("favorites", JSON.stringify(favourites));
+        
+                    // document.querySelector('.favorites').insertAdjacentHTML("beforeend", "<h2>details.title</h2><button>Remove</button>");
+                    let f = e.cloneNode(true);
+                    f.open = null;
+                    document.querySelector('.fav-list').appendChild(f);
+                    
+                    let btn = f.querySelector('button');
+                    btn.innerText='Ta bor faorit';
+                    btn.addEventListener("click", () => {
+                        favourites.splice(favourites.indexOf(details), 1);
+                        localStorage.setItem("favorites", JSON.stringify(favourites));
+                        
+                        document.querySelector('.fav-list').removeChild(f);
+                    });
+
+                });
+
             } else {
                 // details är stängd
             }
@@ -110,4 +128,69 @@ search();
 
 // //////////////////////////////////////////////////////////////////
 
+let favourites = JSON.parse(localStorage.getItem("favorites")) || [];
 
+// document.getElementsByClassName('.no-fav')[0].classList.toggle("hidden", favourites.length > 0)
+
+
+
+
+if (favourites.length > 0) {
+
+    favourites.forEach(element => {
+        let e = document.createElement("details")
+        e.innerHTML = `
+        <summary>
+        ${element.Poster == "N/A" ? "" : "<img src="+element.Poster+">"}
+        <h2>${element.Title}</h2>
+        </summary>`;
+        document.querySelector('.fav-list').appendChild(e)
+
+                let p = document.createElement('p');
+                e.appendChild(p);
+                
+                let details = element;
+
+                // display details
+                let html = "<table>";
+                for (const key in details) {
+                    if (key == "Ratings") {
+                        html+= "<tr><th>"+ key+ "</th><td><table>";
+                        for (let rating of details[key]) {
+                            html += "<tr><th>"+rating.Source + "</th><td>" + rating.Value + "</td></tr>"
+                        }
+                        if (details[key].length == 0) {
+                            html += "No ratings."
+                        }
+                        html += "</table></td></tr>";
+                    } else if (key == "Poster") {
+                        if (details[key] == "N/A") {
+                            html+= "<tr><th>"+ key+ "</th><td> No poster.</td></tr>"
+                        } else {
+                            html+= "<tr><th>"+ key+ "</th><td><img src='"+ details[key]+ "'></td></tr>"
+                        }
+                    } else if (key == "Response") {
+                        // Ignore
+                    } else {
+                        html+= "<tr><th>"+ key+ "</th><td>"+ details[key]+ "</td></tr>"
+                    }
+                }
+                html += "</table>";
+
+                p.innerHTML = html;
+                
+                p.insertAdjacentHTML('beforeend',"<button> Ta bor faorit </button>");
+                    
+                    
+                    let btn = p.querySelector('button');
+                    btn.addEventListener("click", () => {
+                        favourites.splice(favourites.indexOf(details), 1);
+                        localStorage.setItem("favorites", JSON.stringify(favourites));
+                        
+                        document.querySelector('.fav-list').removeChild(p.closest("details"));
+                    });
+
+
+       
+    });
+}
