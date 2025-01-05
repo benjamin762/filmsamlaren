@@ -1,196 +1,171 @@
-document.querySelector("form").addEventListener("submit", (event)=>{event.preventDefault(); search()})
+document.querySelector("#search > form").addEventListener("submit", (event) => { event.preventDefault(); search() })
 
 async function search() {
-    
-    let serch = document.querySelector("input").value;
-    
-    data = await searchApi(serch);
-    updateHtml(data)
+    let search = document.querySelector("#search input").value;
+    data = await searchApi(search);
+    updateHtml(data);
 }
 
 async function getApiKey(location) {
     let response = await fetch(location);
-    let data = await response.json();
-    return data;
+    let key = await response.json();
+    return key;
 }
 const apiKey = getApiKey("api-keys.json");
-// let imdbId,title,searchQuery;
-// let imdburl="http://www.omdbapi.com/?i="+imdbId+"&apikey="+apiKey
-// let titleurl="http://www.omdbapi.com/?t="+title+"&apikey="+apiKey
-// let searchurl="http://www.omdbapi.com/?s="+searchQuery+"&apikey="+apiKey;
 
 async function searchApi(searchQuery) {
-    let searchUrl="http://www.omdbapi.com/?s="+searchQuery+"&apikey="+await apiKey;
-    let response = await fetch (searchUrl)
-    //400 500 osv
+    let searchUrl = "http://www.omdbapi.com/?s=" + searchQuery + "&apikey=" + await apiKey;
+    let response = await fetch(searchUrl);
+    // 400 500 etc.
     if (response.ok = false) {
-        null
+        null;
     }
-    let data = await response.json()
+    let data = await response.json();
     if (data.Response !== "True") {
-        console.log(data)
+        console.log(data);
     }
-    console.log("end of searchApi", data)
-    return data
+    console.log("End of searchApi.", data);
+    return data;
 }
 
 async function updateHtml(data) {
-    let resultSection = document.querySelector(".resultat")
-    resultSection.replaceChildren()
+    let resultSection = document.querySelector(".results");
+    resultSection.replaceChildren();
 
-
-    console.log("beginof update html", data)
+    console.log("Beginning of update html.", data);
     if (data.totalResults == 0) {
-        //inga resultat
+        //No results.
     }
-    data.Search.forEach(element => {
-        let e = document.createElement("details")
-        e.innerHTML = `
-        <summary>
-        ${element.Poster == "N/A" ? "" : "<img src="+element.Poster+">"}
-        <h2>${element.Title}</h2>
-        </summary>`;
-        resultSection.appendChild(e)
+    data.Search.forEach(result => {
+        let resultElement = document.createElement("details");
+        resultElement.innerHTML = `
+            <summary>
+                ${result.Poster == "N/A" ? "" : "<img src=" + result.Poster + ">"}
+                <h2>${result.Title}</h2>
+            </summary>`;
+        resultSection.appendChild(resultElement);
 
-        e.addEventListener("toggle", async (event) => {
-            if(e.open && !e.querySelector('p')) {
-                // details är öppnad och p med mer ifo finns inte
-                let p = document.createElement('p');
-                p.innerText = "Laddar filminfo.";
-                e.appendChild(p);
-                // fetxh details
+        resultElement.addEventListener("toggle", async () => {
+            if (resultElement.open && !resultElement.querySelector('p')) {
+                // Details is opened and <p> with info is not existing.
+                let filmInfoElement = document.createElement('p');
+                filmInfoElement.innerText = "Loading film info.";
+                resultElement.appendChild(filmInfoElement);
+
+                // Fetch details.
                 async function getDetails() {
-                    let response = await fetch("http://www.omdbapi.com/?i="+element.imdbID+"&apikey="+ await apiKey)
+                    let response = await fetch("http://www.omdbapi.com/?i=" + result.imdbID + "&apikey=" + await apiKey)
                     let data = await response.json();
                     return data;
                 }
                 let details = await getDetails();
 
-                // display details
+                // Display details.
                 let html = "<table>";
                 for (const key in details) {
                     if (key == "Ratings") {
-                        html+= "<tr><th>"+ key+ "</th><td><table>";
+                        html += "<tr><th>" + key + "</th><td><table>";
                         for (let rating of details[key]) {
-                            html += "<tr><th>"+rating.Source + "</th><td>" + rating.Value + "</td></tr>"
+                            html += "<tr><th>" + rating.Source + "</th><td>" + rating.Value + "</td></tr>";
                         }
                         if (details[key].length == 0) {
-                            html += "No ratings."
+                            html += "No ratings.";
                         }
                         html += "</table></td></tr>";
                     } else if (key == "Poster") {
                         if (details[key] == "N/A") {
-                            html+= "<tr><th>"+ key+ "</th><td> No poster.</td></tr>"
+                            html += "<tr><th>" + key + "</th><td> No poster.</td></tr>";
                         } else {
-                            html+= "<tr><th>"+ key+ "</th><td><img src='"+ details[key]+ "'></td></tr>"
+                            html += "<tr><th>" + key + "</th><td><img src='" + details[key] + "' alt='Film poster.'></td></tr>";
                         }
                     } else if (key == "Response") {
-                        // Ignore
+                        // Ignore key Response.
                     } else {
-                        html+= "<tr><th>"+ key+ "</th><td>"+ details[key]+ "</td></tr>"
+                        html += "<tr><th>" + key + "</th><td>" + details[key] + "</td></tr>";
                     }
                 }
                 html += "</table>";
 
-                p.innerHTML = html;
+                filmInfoElement.innerHTML = html;
                 console.log(details, typeof details);
 
-                p.insertAdjacentHTML('beforeend',"<button> 😍💑💗❤Favorit </button>");
-                e.querySelector('button').addEventListener('click', function () {
-                    favourites.push(details);
-                    localStorage.setItem("favorites", JSON.stringify(favourites));
-        
-                    // document.querySelector('.favorites').insertAdjacentHTML("beforeend", "<h2>details.title</h2><button>Remove</button>");
-                    let f = e.cloneNode(true);
-                    f.open = null;
-                    document.querySelector('.fav-list').appendChild(f);
-                    
-                    let btn = f.querySelector('button');
-                    btn.innerText='Ta bor faorit';
+                filmInfoElement.insertAdjacentHTML('beforeend', "<button> 💗 Favorite </button>");
+                resultElement.querySelector('button').addEventListener('click', function () {
+                    favorites.push(details);
+                    localStorage.setItem("favorites", JSON.stringify(favorites));
+
+                    let favoriteElement = resultElement.cloneNode(true);
+                    favoriteElement.open = null;
+                    document.querySelector('.fav-list').appendChild(favoriteElement);
+
+                    let btn = favoriteElement.querySelector('button');
+                    btn.innerText = 'Remove favorite';
                     btn.addEventListener("click", () => {
-                        favourites.splice(favourites.indexOf(details), 1);
-                        localStorage.setItem("favorites", JSON.stringify(favourites));
-                        
-                        document.querySelector('.fav-list').removeChild(f);
+                        favorites.splice(favorites.indexOf(details), 1);
+                        localStorage.setItem("favorites", JSON.stringify(favorites));
+
+                        document.querySelector('.fav-list').removeChild(favoriteElement);
                     });
-
                 });
-
-            } else {
-                // details är stängd
             }
         });
     });
 }
 
-search();
-
-
-// //////////////////////////////////////////////////////////////////
-
-let favourites = JSON.parse(localStorage.getItem("favorites")) || [];
-
-// document.getElementsByClassName('.no-fav')[0].classList.toggle("hidden", favourites.length > 0)
+search(); // Load first 10 films from prefilled search.
 
 
 
+let favorites = JSON.parse(localStorage.getItem("favorites")) || [];
 
-if (favourites.length > 0) {
-
-    favourites.forEach(element => {
-        let e = document.createElement("details")
-        e.innerHTML = `
+favorites.forEach(favorite => {
+    let favoriteElement = document.createElement("details");
+    favoriteElement.innerHTML = `
         <summary>
-        ${element.Poster == "N/A" ? "" : "<img src="+element.Poster+">"}
-        <h2>${element.Title}</h2>
+            ${favorite.Poster == "N/A" ? "" : "<img src=" + favorite.Poster + ">"}
+            <h2>${favorite.Title}</h2>
         </summary>`;
-        document.querySelector('.fav-list').appendChild(e)
+    document.querySelector('.fav-list').appendChild(favoriteElement);
 
-                let p = document.createElement('p');
-                e.appendChild(p);
-                
-                let details = element;
+    let filmInfoElement = document.createElement('p');
+    favoriteElement.appendChild(filmInfoElement);
 
-                // display details
-                let html = "<table>";
-                for (const key in details) {
-                    if (key == "Ratings") {
-                        html+= "<tr><th>"+ key+ "</th><td><table>";
-                        for (let rating of details[key]) {
-                            html += "<tr><th>"+rating.Source + "</th><td>" + rating.Value + "</td></tr>"
-                        }
-                        if (details[key].length == 0) {
-                            html += "No ratings."
-                        }
-                        html += "</table></td></tr>";
-                    } else if (key == "Poster") {
-                        if (details[key] == "N/A") {
-                            html+= "<tr><th>"+ key+ "</th><td> No poster.</td></tr>"
-                        } else {
-                            html+= "<tr><th>"+ key+ "</th><td><img src='"+ details[key]+ "'></td></tr>"
-                        }
-                    } else if (key == "Response") {
-                        // Ignore
-                    } else {
-                        html+= "<tr><th>"+ key+ "</th><td>"+ details[key]+ "</td></tr>"
-                    }
-                }
-                html += "</table>";
+    let details = favorite;
 
-                p.innerHTML = html;
-                
-                p.insertAdjacentHTML('beforeend',"<button> Ta bor faorit </button>");
-                    
-                    
-                    let btn = p.querySelector('button');
-                    btn.addEventListener("click", () => {
-                        favourites.splice(favourites.indexOf(details), 1);
-                        localStorage.setItem("favorites", JSON.stringify(favourites));
-                        
-                        document.querySelector('.fav-list').removeChild(p.closest("details"));
-                    });
+    // Display details.
+    let html = "<table>";
+    for (const key in details) {
+        if (key == "Ratings") {
+            html += "<tr><th>" + key + "</th><td><table>";
+            for (let rating of details[key]) {
+                html += "<tr><th>" + rating.Source + "</th><td>" + rating.Value + "</td></tr>";
+            }
+            if (details[key].length == 0) {
+                html += "No ratings.";
+            }
+            html += "</table></td></tr>";
+        } else if (key == "Poster") {
+            if (details[key] == "N/A") {
+                html += "<tr><th>" + key + "</th><td> No poster.</td></tr>";
+            } else {
+                html += "<tr><th>" + key + "</th><td><img src='" + details[key] + "' alt='Film poster.'></td></tr>";
+            }
+        } else if (key == "Response") {
+            // Ignore key Response.
+        } else {
+            html += "<tr><th>" + key + "</th><td>" + details[key] + "</td></tr>";
+        }
+    }
+    html += "</table>";
 
+    filmInfoElement.innerHTML = html;
 
-       
+    filmInfoElement.insertAdjacentHTML('beforeend', "<button> Remove favorite </button>");
+    let btn = filmInfoElement.querySelector('button');
+    btn.addEventListener("click", () => {
+        favorites.splice(favorites.indexOf(details), 1);
+        localStorage.setItem("favorites", JSON.stringify(favorites));
+
+        document.querySelector('.fav-list').removeChild( filmInfoElement.closest("details") );
     });
-}
+});

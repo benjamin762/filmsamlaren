@@ -1,51 +1,35 @@
+/* Page header */
 header {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    align-items: baseline;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
 }
 header nav {
-    display: flex;
-    gap: 20px;
+  display: flex;
+  gap: 20px;
 }
 
-
-
-.resultat {
-    /* display: flex; */
-    /* flex-wrap: wrap; */
-}
-
-.resultat > p {
-    /* flex: initial; */
-}
-
+/* Film item */
 summary {
-    display: flex;
-    gap: 12px;
+  display: flex;
+  gap: 12px;
 }
 summary:hover {
-    cursor: pointer;
-    background: rgb(221, 221, 221);
+  cursor: pointer;
+  background: rgb(221, 221, 221);
 }
- /* summary > h2 {
-    display: inline;
- } */
 summary > img {
-    height: 4em;
+  height: 4em;
 }
 details[open] {
-    border: solid;
+  border: solid;
 
-    summary {
-        background: burlywood;
-    }
+  summary {
+    background: burlywood;
+  }
 
-    button {
-        margin: 16px 0 24px 100px;
-    }
-}
-
-hidden {
-    display: none;
+  button {
+    margin: 16px 0 24px 100px;
+  }
 }
