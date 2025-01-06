@@ -124,6 +124,11 @@ async function updateHtml(data) {
 
                 filmInfoElement.insertAdjacentHTML('beforeend', "<button> 💗 Favorite </button>");
                 resultElement.querySelector('button').addEventListener('click', function () {
+                    // Check if already favorite
+                    if (!favorites.every(favorite => favorite.imdbID != details.imdbID)) {
+                        return;
+                    }
+
                     favorites.push(details);
                     localStorage.setItem("favorites", JSON.stringify(favorites));
 
