@@ -2,40 +2,61 @@ document.querySelector("#search > form").addEventListener("submit", (event) => {
 
 async function search() {
     let search = document.querySelector("#search input").value;
-    data = await searchApi(search);
-    updateHtml(data);
+    if (search.trim() == "") {
+        // Don't allow empty search. Do nothing and let old results stay on page.
+        return;
+    }
+    let data = await searchApi(search);
+    if (data.Response == "True") {
+        updateHtml(data);
+    }
 }
 
 async function getApiKey(location) {
+    try {
     let response = await fetch(location);
-    let key = await response.json();
+    if (!response.ok) {
+        throw new Error("Could not load api-keys.json. See readme.md for setup instructions.")
+    }
+    let key;
+    try {
+        key = await response.json();
+    } catch (error) {
+        throw new Error("Could not parse api-keys.json as json. See readme for setup inctructions and api-keys.json.example for correct json form.");
+    }
     return key;
+    } catch (error) {
+        console.log(error);
+        document.body.replaceChildren(error);
+    }
 }
 const apiKey = getApiKey("api-keys.json");
 
 async function searchApi(searchQuery) {
-    let searchUrl = "http://www.omdbapi.com/?s=" + searchQuery + "&apikey=" + await apiKey;
-    let response = await fetch(searchUrl);
-    // 400 500 etc.
-    if (response.ok = false) {
-        null;
+    try {
+        let searchUrl = "http://www.omdbapi.com/?s=" + searchQuery + "&apikey=" + await apiKey;
+        let response = await fetch(searchUrl);
+        if (response.ok == false) {
+            throw new Error("Search api did not respond ok. Check your internet connection and correct api key or try again later.");
+        }
+        let data = await response.json();
+        if (data.Response !== "True") {
+            throw new Error(data.Error);
+        }
+        return data;
+    } catch (error) {
+        if (error == "TypeError: Failed to fetch") {
+            error = "Failed to connect to search check your internet connection.";
+        }
+        console.log(error);
+        document.querySelector('.results').replaceChildren(error);
     }
-    let data = await response.json();
-    if (data.Response !== "True") {
-        console.log(data);
-    }
-    console.log("End of searchApi.", data);
-    return data;
 }
 
 async function updateHtml(data) {
     let resultSection = document.querySelector(".results");
     resultSection.replaceChildren();
 
-    console.log("Beginning of update html.", data);
-    if (data.totalResults == 0) {
-        //No results.
-    }
     data.Search.forEach(result => {
         let resultElement = document.createElement("details");
         resultElement.innerHTML = `
@@ -54,12 +75,23 @@ async function updateHtml(data) {
 
                 // Fetch details.
                 async function getDetails() {
-                    let response = await fetch("http://www.omdbapi.com/?i=" + result.imdbID + "&apikey=" + await apiKey)
-                    let data = await response.json();
-                    return data;
+                    try {
+                        let response = await fetch("http://www.omdbapi.com/?i=" + result.imdbID + "&apikey=" + await apiKey)
+                        let data = await response.json();
+                        if (data.Response == "False") {
+                            throw new Error();
+                        }
+                        return data;
+                    } catch (error) {
+                        console.log(error);
+                        filmInfoElement.innerText = "Failed to load film details.";
+                        return "error";
+                    }
                 }
                 let details = await getDetails();
-
+                if (details == "error") {
+                    return;
+                }
                 // Display details.
                 let html = "<table>";
                 for (const key in details) {
@@ -87,7 +119,6 @@ async function updateHtml(data) {
                 html += "</table>";
 
                 filmInfoElement.innerHTML = html;
-                console.log(details, typeof details);
 
                 filmInfoElement.insertAdjacentHTML('beforeend', "<button> 💗 Favorite </button>");
                 resultElement.querySelector('button').addEventListener('click', function () {
