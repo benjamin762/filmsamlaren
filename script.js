@@ -14,17 +14,19 @@ async function search() {
 
 async function getApiKey(location) {
     try {
-    let response = await fetch(location);
-    if (!response.ok) {
-        throw new Error("Could not load api-keys.json. See readme.md for setup instructions.")
-    }
-    let key;
-    try {
-        key = await response.json();
-    } catch (error) {
-        throw new Error("Could not parse api-keys.json as json. See readme for setup inctructions and api-keys.json.example for correct json form.");
-    }
-    return key;
+        // let response = await fetch(location);
+        let [response] = await Promise.all([fetch(location)]); // Use Promise.all because of customer requirement to use Promise.all. Can be removed once need for Promise.all is found elsewhere.
+            
+        if (!response.ok) {
+            throw new Error("Could not load api-keys.json. See readme.md for setup instructions.")
+        }
+        let key;
+        try {
+            key = await response.json();
+        } catch (error) {
+            throw new Error("Could not parse api-keys.json as json. See readme for setup inctructions and api-keys.json.example for correct json form.");
+        }
+        return key;
     } catch (error) {
         console.log(error);
         document.body.replaceChildren(error);
